@@ -1,0 +1,80 @@
+import com.android.build.gradle.api.ApplicationVariant
+import org.apache.tools.ant.taskdefs.condition.Os
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+}
+
+//project.afterEvaluate {
+//    android.libraryVariants.all { variant ->
+//        def variantName = variant.name.capitalize()
+//        if (variantName == "Release"){
+//            return
+//        }
+//        Task generateDexTask = project.tasks.create("generateRuntimeDexFor${variantName}")
+//        generateDexTask.group = 'dianDex'
+//        project.tasks.findByName("assembleDebug").dependsOn generateDexTask
+//        generateDexTask.mustRunAfter project.tasks.findByName("compileDebugSources")
+//        generateDexTask.doLast {
+//            File inputDirectory = project.file("build/intermediates/javac/debug/classes")
+//            new File(inputDirectory, "com").deleteDir()
+//            String sdkDirectory = project.android.getSdkDirectory()
+//            if (sdkDirectory.contains("\\")) {
+//                sdkDirectory = sdkDirectory.replace("\\", "/");
+//            }
+//            String dxcmd = ""
+//            File dx = new File(sdkDirectory, "build-tools${File.separator}${project.android.getBuildToolsVersion()}${File.separator}dx")
+//            dxcmd = dx.absolutePath
+//            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+//                dxcmd =  "${dxcmd}.bat"
+//            }
+//
+//            project.file("build/outputs/dianDex/${variantName.toLowerCase()}").mkdirs()
+//            File outDex = project.file("build/outputs/dianDex/${variantName.toLowerCase()}/hack.dex")
+//            dxcmd = "${dxcmd} --dex --output=${outDex} ${inputDirectory}"
+//            println("=== dx cmd in rumtime: " + dxcmd)
+//
+//            def process = dxcmd.execute()
+//            int status = process.waitFor()
+//            process.destroy()
+//            if (status == 0) {
+//                println("=== Generate hack.dex success.")
+//            }
+//
+//            project.copy {
+//                from outDex
+//                into project.rootProject.file("app")
+//            }
+//        }
+//    }
+//}

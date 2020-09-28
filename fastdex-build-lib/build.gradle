@@ -1,0 +1,41 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+[compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
+
+dependencies {
+    implementation project(':fastdex-common')
+    implementation 'org.apache.ant:ant:1.8.2'
+    implementation 'com.google.guava:guava:18.0'
+    implementation 'com.android.tools.ddms:ddmlib:22.0'
+
+    implementation 'com.google.code.gson:gson:2.3.1'
+
+//    compile 'junit:junit:4.12'
+//    compile 'com.google.code.gson:gson:2.3.1'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "src/main/java"
+        }
+
+        resources {
+            srcDir "src/main/resources"
+        }
+    }
+}
+
+
+def generated = new File("${project.buildDir}/generated/java")
+sourceSets {
+    main {
+        java {
+            srcDir generated
+        }
+    }
+}

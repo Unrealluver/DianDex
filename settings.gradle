@@ -1,0 +1,6 @@
+rootProject.name='GradleTest'
+include ':app'
+include ':diandex'
+include ':fastdex-build-lib'
+include ':fastdex-common'
+//include ':diandex-runtime'

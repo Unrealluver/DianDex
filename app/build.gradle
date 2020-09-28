@@ -1,0 +1,146 @@
+apply plugin: 'com.android.application'
+apply plugin: 'diandex.app'
+
+android {
+
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
+
+    defaultConfig {
+        applicationId "com.example.gradletest"
+        minSdkVersion 16
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+
+//    dianDex {
+//        dianDexEnable true
+//    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+//    implementation 'com.android.tools.build:gradle:3.0.1'
+}
+
+task helloworld {
+    //该任务并没有被添加到执行列表中，故不会被执行
+    //此条信息只会在构建过程被输出
+    //println("print in configuration")
+
+    //此条相当于给compileDebugJavaWithJavac任务添加了一个doFirst
+    //故会跟随该任务一起执行
+//    afterEvaluate {
+//        tasks.findByName('compileDebugJavaWithJavac').doFirst {
+//            println("Hello World!")
+//        }
+//    }
+}
+
+task installAndRun(dependsOn: 'assembleDebug') {
+    doFirst {
+        exec {
+            workingDir "${buildDir}/outputs/apk/debug"
+            commandLine 'adb', 'install', '-r', 'app-debug.apk'
+        }
+        exec {
+            def path = "${buildDir}/intermediates/manifests/full/debug/AndroidManifest.xml"
+            // xml 解析
+            def parser = new XmlParser(false, false).parse(new File(path))
+            // application 下的每一个 activity 结点
+            parser.application.activity.each { activity ->
+                // activity 下的每一个 intent-filter 结点
+                activity.'intent-filter'.each { filter ->
+                    // intent-filter 下的 action 结点中的 @android:name 包含 android.intent.action.MAIN
+                    if (filter.action.@"android:name".contains("android.intent.action.MAIN")) {
+                        def targetActivity = activity.@"android:name"
+                        commandLine 'adb', 'shell', 'am', 'start', '-n',
+                                "${android.defaultConfig.applicationId}/${targetActivity}"
+                    }
+                }
+            }
+        }
+    }
+}
+
+Logger mLogger = new Logger("timeCoast",project);
+gradle.taskGraph.afterTask { task ->;
+//    if(!task.project.getName().contains("app_driver")){
+//        return
+//    }
+    StringBuffer taskDetails = new StringBuffer()
+    taskDetails << """-----task begin-------->;
+project:     $task.project 
+name:        $task.name 
+group:       $task.group 
+description: $task.description
+conv:        $task.convention.plugins
+inputs:
+"""
+    task.inputs.files.each{ it ->;
+        taskDetails << " ${it.absolutePath}\n"
+    }
+    taskDetails << "outputs:\n"
+    task.outputs.files.each{ it ->;
+        taskDetails << " ${it.absolutePath}\n"
+    }
+
+    taskDetails << "<------task end -------\n"
+
+    mLogger.log(taskDetails.toString());
+}
+
+class Logger {
+    File mFile;
+    Logger(String fileName,Project project) {
+        mFile = new File(project.getRootDir(), String.format("%s-%s.txt", fileName,project.getName()));
+        try {
+            mFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void clear() {
+        if (mFile != null) {
+            mFile.delete();
+        }
+    }
+    void log(String text) {
+        if (mFile != null) {
+            FileWriter fw = null;
+            try {
+                fw = new FileWriter(mFile, true);
+                fw.append(text + "\r\n");
+            } catch (IOException var9) {
+            } finally {
+                if (fw != null) {
+                    try {
+                        fw.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+}

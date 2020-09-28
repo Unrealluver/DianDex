@@ -1,0 +1,43 @@
+apply plugin: 'groovy'
+apply plugin: 'java'
+apply plugin: 'maven'
+
+install {
+    repositories.mavenInstaller {
+        pom.version = '0.0.1' // 配置插件版本号
+        pom.artifactId = 'diandex' // 配置插件标识
+        pom.groupId = 'com.dian.plugin' // 配置插件组织
+    }
+}
+
+buildscript {
+    repositories {
+        mavenLocal()
+//        maven { url 'http://depot.sankuai.com/nexus/content/groups/public/' }
+//        maven { url 'https://maven.google.com' }
+        jcenter()
+    }
+}
+
+repositories {
+    mavenLocal()
+//    maven {
+//        url "http://mvn.dianpingoa.com/android-nova"
+//    }
+//    maven {
+//        url 'http://depot.sankuai.com/nexus/content/groups/public/'
+//    }
+//    maven { url 'https://maven.google.com' }
+}
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation 'com.android.tools.build:gradle:3.6.1'
+    implementation project(':fastdex-build-lib')
+    implementation project(':fastdex-common')
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
